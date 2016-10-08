@@ -8,11 +8,13 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import vandy.mooc.assignments.R;
 import vandy.mooc.assignments.framework.application.activities.GalleryActivityBase;
+import vandy.mooc.assignments.framework.utils.FileUtils;
 import vandy.mooc.assignments.framework.utils.UriUtils;
 import vandy.mooc.assignments.framework.utils.ViewUtils;
 
@@ -68,14 +70,15 @@ public class GalleryActivity
         // TODO (A1): Create a new intent for starting this activity
         // using the passed context along with the class identifier
         // for this class.
-        
+        Intent intent = new Intent();
+        intent.setClass(context, context.getClass());
 
         // TODO (A1): Put the received list of input URLs as an intent
         // extra using the predefined INTENT_EXTRA_URLS extra name.
-        
+        intent.putExtra(INTENT_EXTRA_URLS, inputUrls);
 
         // TODO (A1): Return the intent.
-        
+        return intent;
     }
 
     /*
@@ -125,7 +128,9 @@ public class GalleryActivity
         // Next, validate the extracted list URL strings by calling the local
         // validateInput() helper method. If the entire list of received URLs
         // are valid, then return this list. Otherwise return null.
-        
+        ArrayList<Uri> urls = (ArrayList<Uri>) intent.getSerializableExtra(INTENT_EXTRA_URLS);
+        urls = validateInput(urls) ? urls : null;
+        return urls;
     }
 
     /**
@@ -142,19 +147,33 @@ public class GalleryActivity
         // If the list is null call ViewUtils.showToast() to display the
         // string R.string.input_url_list_is_null.
         //
+        if (inputUrls == null) {
+            // ViewUtils.showToast(this, android.R.string.input_url_list_is_null, inputUrls);
+            return false;
+        }
+
         // If the list has a size of 0 then call ViewUtils.showToast()
         // to display the the string R.string.input_url_list_is_empty
         //
+        if (inputUrls.size() == 0) {
+            // ViewUtils.showToast(this, android.R.string.input_url_list_is_null, inputUrls);
+            return false;
+        }
+
         // Otherwise check if each list entry is valid using the
         // FileUtils.isValidUrl() helper and if any URL is not valid
         // return false.
         //
+        for (Uri uri: inputUrls) {
+            if(!FileUtils.createDir(this, uri.getPath()).exists())
+                return false;
+        }
         // Return true if all the URLs are valid.
 
        
 
         // Input passed all tests, so return true.
-        
+        return true;
     }
 
     /**
